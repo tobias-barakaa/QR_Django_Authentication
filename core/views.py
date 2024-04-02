@@ -17,6 +17,8 @@ from .serializers import UserSerializer
 from .models import User, UserToken
 from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
 from rest_framework.authentication import get_authorization_header
+import random
+import string
 # Create your views here.
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -88,3 +90,7 @@ class LogoutAPIVIEW(APIView):
             'message': 'success'
         }
         return response
+
+class ResetAPIView(APIView):
+    def post(self, request):
+        token = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(10))
