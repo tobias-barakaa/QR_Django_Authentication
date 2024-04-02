@@ -23,5 +23,8 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     
-    def __str__(self):
-        return self.email
+class UserToken(models.Model):
+    user_id = models.IntergerField()
+    token = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField()
