@@ -24,7 +24,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
     
 class UserToken(models.Model):
-    user_id = models.IntergerField()
+    user_id = models.IntegerField()  
     token = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     expired_at = models.DateTimeField()
