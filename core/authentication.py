@@ -48,8 +48,7 @@ def decode_access_token(token):
     try:
         payload = jwt.decode(token, 'access_secret', algorithms=['HS256'])
         return payload['user_id']
-    except Exception as e:
-        print(e)
+    except:
         raise exceptions.AuthenticationFailed('Invalid token')
 
 def create_refresh_token(id):
@@ -59,3 +58,11 @@ def create_refresh_token(id):
         'iat': datetime.datetime.now(timezone.utc)
     }, 'refresh_secret', algorithm='HS256')
 
+
+
+def decode_refresh_token(token):
+    try:
+        payload = jwt.decode(token, 'refresh_secret', algorithms=['HS256'])
+        return payload['user_id']
+    except:
+        raise exceptions.AuthenticationFailed('Invalid token')

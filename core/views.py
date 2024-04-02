@@ -1,11 +1,20 @@
+# from django.shortcuts import render
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+# from rest_framework import exceptions, status
+# from .serializers import UserSerializer
+# from .models import User
+# from .authentication import decode_refresh_token, create_access_token,JWTAuthentication , create_refresh_token
+# from rest_framework.authentication import get_authorization_header
+from django.urls import path
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import exceptions, status
 from .serializers import UserSerializer
 from .models import User
-from .authentication import create_access_token,JWTAuthentication , create_refresh_token
+from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
 from rest_framework.authentication import get_authorization_header
 # Create your views here.
 class RegisterAPIView(APIView):
@@ -49,5 +58,17 @@ class UserAPIiew(APIView):
 class RefreshAPIVIEW(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
+        id = decode_refresh_token(refresh_token)
         
-        return Response(refresh_token)
+        access_token = create_access_token(id)
+        return Response(access_token)
+    
+
+class LogoutAPIVIEW(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('refresh_token')  # Provide the name of the cookie directly
+        response.data = {
+            'message': 'success'
+        }
+        return response
