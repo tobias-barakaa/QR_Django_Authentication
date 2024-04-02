@@ -12,8 +12,9 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import exceptions, status
+import datetime
 from .serializers import UserSerializer
-from .models import User
+from .models import User, UserToken
 from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
 from rest_framework.authentication import get_authorization_header
 # Create your views here.
@@ -43,6 +44,11 @@ class LoginAPIView(APIView):
         
         access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
+        UserToken.objects.create(
+            user_id=user.id,
+            token=refresh_token,
+            expired_at=datetime.datetime.urcnow() + datetime.timedelta(days=7)
+        )
 
         response = Response({'token': access_token}, status=status.HTTP_200_OK)
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
@@ -59,6 +65,13 @@ class RefreshAPIVIEW(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         id = decode_refresh_token(refresh_token)
+        if not UserToken.objects.filter(
+            user_id=id, 
+            token=refresh_token,
+            expired_at__gt=datetime.datetime.now(tz=datetime.timezone.utc)
+            
+        ).exists():
+            raise exceptions.AuthenticationFailed('Unauthenticated')
         
         access_token = create_access_token(id)
         return Response(access_token)
@@ -66,6 +79,9 @@ class RefreshAPIVIEW(APIView):
 
 class LogoutAPIVIEW(APIView):
     def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        UserToken.objects.filter(token=refresh_token).delete()
+        
         response = Response()
         response.delete_cookie('refresh_token')  # Provide the name of the cookie directly
         response.data = {
