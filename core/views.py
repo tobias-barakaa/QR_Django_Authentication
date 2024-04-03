@@ -21,6 +21,9 @@ import random
 import string
 from django.core.mail import send_mail
 
+
+from datetime import datetime, timedelta
+
 # Create your views here.
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -32,6 +35,32 @@ class RegisterAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+# class LoginAPIView(APIView):
+#     def post(self, request):
+#         email = request.data['email']
+#         password = request.data['password']
+        
+#         user = User.objects.filter(email=email).first()
+        
+#         if user is None:
+#             raise exceptions.AuthenticationFailed('User not found')
+        
+#         if not user.check_password(password):
+#             raise exceptions.AuthenticationFailed('Incorrect password')
+        
+#         access_token = create_access_token(user.id)
+#         refresh_token = create_refresh_token(user.id)
+#         UserToken.objects.create(
+#             user_id=user.id,
+#             token=refresh_token,
+#             expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7)
+#         )
+
+#         response = Response({'token': access_token}, status=status.HTTP_200_OK)
+#         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+
+#         return response
 
 class LoginAPIView(APIView):
     def post(self, request):
@@ -51,13 +80,21 @@ class LoginAPIView(APIView):
         UserToken.objects.create(
             user_id=user.id,
             token=refresh_token,
-            expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7)
+            expired_at=datetime.utcnow() + timedelta(days=7) # corrected line
         )
 
-        response = Response({'token': access_token}, status=status.HTTP_200_OK)
+        # Include both tokens in the response
+        response_data = {
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }
+        response = Response(response_data, status=status.HTTP_200_OK)
+        
+        # Set the refresh token as a cookie
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
 
         return response
+
 
 class UserAPIiew(APIView):
     authentication_classes = [JWTAuthentication]
