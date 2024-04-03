@@ -19,6 +19,8 @@ from .authentication import decode_refresh_token, create_access_token, JWTAuthen
 from rest_framework.authentication import get_authorization_header
 import random
 import string
+from django.core.mail import send_mail
+
 # Create your views here.
 class RegisterAPIView(APIView):
     def post(self, request):
@@ -49,7 +51,7 @@ class LoginAPIView(APIView):
         UserToken.objects.create(
             user_id=user.id,
             token=refresh_token,
-            expired_at=datetime.datetime.urcnow() + datetime.timedelta(days=7)
+            expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7)
         )
 
         response = Response({'token': access_token}, status=status.HTTP_200_OK)
@@ -91,13 +93,44 @@ class LogoutAPIVIEW(APIView):
         }
         return response
 
-class ResetAPIView(APIView):
+class ForgotResetAPIView(APIView):
     def post(self, request):
+        email = request.data['email']
         token = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(10))
         
         Reset.objects.create(
             email=request.data['email'],
             token=token
         )
+        url = 'http://localhost:3000/reset/' + token
+        send_mail(
+            subject='Password Reset',
+            message='Click <a href="%s"> here </a>is your password reset link' % url,
+            from_email='from@example.com',
+            recipient_list=[email]
+)
+
+        
+        return Response({'message': 'success'})
+
+class ResetAPIView(APIView):
+    def post(self, request):
+        data = request.data
+        
+        if data['password'] != data['password_confirm']:
+            raise exceptions.APIException('Passwords do not match')
+        
+        reset_password = Reset.objects.filter(token=data['token']).first()
+        
+        if not reset_password:
+            raise exceptions.APIException('Invalid token')
+        
+        user = User.objects.filter(email=reset_password.email).first()
+        
+        if not user:
+            raise exceptions.APIException('User not found')
+        
+        user.set_password(data['password'])
+        user.save()
         
         return Response({'message': 'success'})
