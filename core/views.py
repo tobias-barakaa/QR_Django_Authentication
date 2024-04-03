@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework import exceptions, status
 import datetime
 from .serializers import UserSerializer
-from .models import User, UserToken
+from .models import Reset, User, UserToken
 from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
 from rest_framework.authentication import get_authorization_header
 import random
@@ -94,3 +94,10 @@ class LogoutAPIVIEW(APIView):
 class ResetAPIView(APIView):
     def post(self, request):
         token = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(10))
+        
+        Reset.objects.create(
+            email=request.data['email'],
+            token=token
+        )
+        
+        return Response({'message': 'success'})
