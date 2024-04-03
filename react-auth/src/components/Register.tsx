@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 
 export const Register = () => {
@@ -7,14 +9,26 @@ const [lastName, setLastName] = useState('')
 const [email, setEmail] = useState('')
 const [password, setPassword] = useState('')
 const [passwordConfirm, setPasswordConfirm] = useState('')
+const [redirect, setRedirect] = useState(false)
 
 
-const submit = (e:any) => {
+const submit = async (e:any) => {
     e.preventDefault()
-    console.log('what')
+    await axios.post('http://localhost:3000/register', {
+        firstName:firstName,
+        lastName:lastName,
+        email:email,
+        password:password,
+        passwordConfirm:passwordConfirm
+    })
+
+    setRedirect(true)
 
 }
 
+if(redirect) {
+    return <Navigate to='/login' />
+}
 
 
     return(
