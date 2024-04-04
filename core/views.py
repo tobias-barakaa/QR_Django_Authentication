@@ -96,11 +96,12 @@ class LoginAPIView(APIView):
         return response
 
 
-class UserAPIiew(APIView):
+class UserAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
 
 class RefreshAPIVIEW(APIView):
     def post(self, request):

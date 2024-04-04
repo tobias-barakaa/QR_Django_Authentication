@@ -33,14 +33,14 @@ class JWTAuthentication(BaseAuthentication):
             
             user = User.objects.get(pk=id)
             
-            return user, None
+            return (user, None)
             
         raise exceptions.AuthenticationFailed('Unauthenticated')
 
 def create_access_token(id):
     return jwt.encode({
         'user_id': id,
-        'exp': datetime.datetime.now(timezone.utc) + datetime.timedelta(seconds=30),
+        'exp': datetime.datetime.now(timezone.utc) + datetime.timedelta(seconds=59),
         'iat': datetime.datetime.now(timezone.utc)
     }, 'access_secret', algorithm='HS256')
 

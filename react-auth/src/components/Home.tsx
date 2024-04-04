@@ -8,7 +8,7 @@ export const Home = () => {
         (async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/user', {
-                withCredentials: true
+                withCredentials: true,
             })
             const user = await response.data
             setMessage( `Hi ${user.first_name} ${user.last_name}`)
