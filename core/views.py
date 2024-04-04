@@ -7,22 +7,36 @@
 # from .models import User
 # from .authentication import decode_refresh_token, create_access_token,JWTAuthentication , create_refresh_token
 # from rest_framework.authentication import get_authorization_header
-from django.urls import path
+
+
+
+# from django.urls import path
+# from django.shortcuts import render
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import exceptions, status
+# import datetime
+# from .serializers import UserSerializer
+# from .models import Reset, User, UserToken
+# from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
+# from rest_framework.authentication import get_authorization_header
+# import random
+# import string
+# from django.core.mail import send_mail
+# from datetime import datetime,timedelta, timezone
+
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import exceptions, status
-import datetime
 from .serializers import UserSerializer
 from .models import Reset, User, UserToken
 from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
-from rest_framework.authentication import get_authorization_header
-import random
-import string
 from django.core.mail import send_mail
+from datetime import datetime, timedelta, timezone
 
 
-from datetime import datetime, timedelta
+
 
 # Create your views here.
 class RegisterAPIView(APIView):
@@ -35,6 +49,64 @@ class RegisterAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+class LoginAPIView(APIView):
+    def post(self, request):
+        email = request.data['email']
+        password = request.data['password']
+        
+        user = User.objects.filter(email=email).first()
+        
+        if user is None:
+            raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+        if not user.check_password(password):
+            raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+        UserToken.objects.create(
+            user_id=user.id,
+            token=refresh_token,
+            expired_at=datetime.now(timezone.utc) + timedelta(days=7)  # Use datetime directly
+        )
+        
+        response = Response()
+
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        response.data = {
+            'token': access_token
+        }
+        return response
+
+# class LoginAPIView(APIView):
+#     def post(self, request):
+#         email = request.data['email']
+#         password = request.data['password']
+        
+#         user = User.objects.filter(email=email).first()
+        
+#         if user is None:
+#             raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+#         if not user.check_password(password):
+#             raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+#         access_token = create_access_token(user.id)
+#         refresh_token = create_refresh_token(user.id)
+#         UserToken.objects.create(
+#             user_id=user.id,
+#             token=refresh_token,
+#             expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7)
+#         )
+        
+#         response = Response()
+
+#         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+#         response.data = {
+#             'token': access_token
+#         }
+#         return response
 
 # class LoginAPIView(APIView):
 #     def post(self, request):
@@ -54,46 +126,47 @@ class RegisterAPIView(APIView):
 #         UserToken.objects.create(
 #             user_id=user.id,
 #             token=refresh_token,
-#             expired_at=datetime.datetime.utcnow() + datetime.timedelta(days=7)
+#             expired_at=datetime.utcnow() + timedelta(days=7) # corrected line
 #         )
 
-#         response = Response({'token': access_token}, status=status.HTTP_200_OK)
+#         # Include both tokens in the response
+#         response_data = {
+#             'access_token': access_token,
+#             'refresh_token': refresh_token
+#         }
+#         response = Response(response_data, status=status.HTTP_200_OK)
+        
+#         # Set the refresh token as a cookie
 #         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
 
 #         return response
 
-class LoginAPIView(APIView):
-    def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
-        
-        user = User.objects.filter(email=email).first()
-        
-        if user is None:
-            raise exceptions.AuthenticationFailed('User not found')
-        
-        if not user.check_password(password):
-            raise exceptions.AuthenticationFailed('Incorrect password')
-        
-        access_token = create_access_token(user.id)
-        refresh_token = create_refresh_token(user.id)
-        UserToken.objects.create(
-            user_id=user.id,
-            token=refresh_token,
-            expired_at=datetime.utcnow() + timedelta(days=7) # corrected line
-        )
 
-        # Include both tokens in the response
-        response_data = {
-            'access_token': access_token,
-            'refresh_token': refresh_token
-        }
-        response = Response(response_data, status=status.HTTP_200_OK)
+# class LoginAPIView(APIView):
+#     def post(self, request):
+#         email = request.data['email']
+#         password = request.data['password']
         
-        # Set the refresh token as a cookie
-        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
-
-        return response
+#         user = User.objects.filter(email=email).first()
+        
+#         if user is None:
+#             raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+#         if not user.check_password(password):
+#             raise exceptions.AuthenticationFailed('Incorrect password')
+        
+#         access_token = create_access_token(user.id)
+#         refresh_token = create_refresh_token(user.id)
+        
+#         response = Response()
+#         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+        
+#         response.data = {
+#             'access_token': access_token,
+#             'refresh_token': refresh_token
+            
+#         }
+#         return response
 
 
 class UserAPIView(APIView):
@@ -103,20 +176,39 @@ class UserAPIView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
-class RefreshAPIVIEW(APIView):
+
+# class RefreshAPIVIEW(APIView):
+#     def post(self, request):
+#         refresh_token = request.COOKIES.get('refresh_token')
+#         id = decode_refresh_token(refresh_token)
+#         if not UserToken.objects.filter(
+#             user_id=id, 
+#             token=refresh_token,
+#             expired_at__gt=datetime.now(timezone.utc)
+            
+#         ).exists():
+#             raise exceptions.AuthenticationFailed('Unauthenticated')
+        
+#         access_token = create_access_token(id)
+#         return Response({
+#             'token': access_token
+#         })
+class RefreshAPIView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh_token')
         id = decode_refresh_token(refresh_token)
         if not UserToken.objects.filter(
             user_id=id, 
             token=refresh_token,
-            expired_at__gt=datetime.datetime.now(tz=datetime.timezone.utc)
-            
+            expired_at__gt=datetime.now(timezone.utc)
         ).exists():
             raise exceptions.AuthenticationFailed('Unauthenticated')
         
-        access_token = create_access_token(id)
-        return Response(access_token)
+        access_token = create_access_token(id)  # This is the access_token
+        return Response({
+            'token': access_token  # This should return the access_token
+        })
+
     
 
 class LogoutAPIVIEW(APIView):

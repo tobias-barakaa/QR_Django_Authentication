@@ -14,13 +14,13 @@ const [redirect, setRedirect] = useState(false)
 
 const submit = async (e:any) => {
     e.preventDefault()
-    await axios.post('http://localhost:8000/api/register', {
+    await axios.post('http://127.0.0.1:8000/api/register', {
         first_name:first_name,
         last_name:last_name,
         email:email,
         password:password,
         password_confirm:password_confirm
-    })
+    }, {withCredentials: true})
 
     setRedirect(true)
 

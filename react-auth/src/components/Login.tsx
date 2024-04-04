@@ -9,10 +9,10 @@ export const Login = () => {
 
     const submit = async(e:any) => {
         e.preventDefault()
-        const response = await axios.post('http://localhost:8000/api/login', {
+        await axios.post('http://127.0.0.1:8000/api/login', {
             email: email,
             password: password
-        }, {withCredentials: true})
+        })
         setRedirect(true)
 
     }

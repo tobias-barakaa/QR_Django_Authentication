@@ -1,8 +1,44 @@
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 
 export const Nav = () => {
+const [auth, setAuth] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            await axios.get('user');
+            setAuth(true);
+        } catch (error) {
+            setAuth(false);
+        }
+    };
+
+    fetchData();
+
+}, []);
+
+const logout = async() => {
+await axios.post('logout')
+}
+
+let links;
+if(auth) {
+links = <div className="text-end">
+            
+            <Link to="" onClick={logout} type="button" className="btn btn-outline-light">Logout</Link>
+          </div>
+
+} else{
+  links = <div className="text-end">
+            
+  <Link to="login" type="button" className="btn btn-outline-light me-2">Login</Link>
+  <Link to="register" type="button" className="btn btn-outline-light">Register</Link>
+</div>
+
+}
     return(
         <>
         <header className="p-3 bg-dark text-white">
@@ -18,11 +54,7 @@ export const Nav = () => {
 
        
 
-        <div className="text-end">
-            
-          <Link to="login" type="button" className="btn btn-outline-light me-2">Login</Link>
-          <Link to="register" type="button" className="btn btn-outline-light">Register</Link>
-        </div>
+        {links}
       </div>
       </header>
         </>
