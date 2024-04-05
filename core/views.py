@@ -10,30 +10,30 @@
 
 
 
-# from django.urls import path
-# from django.shortcuts import render
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from rest_framework import exceptions, status
-# import datetime
-# from .serializers import UserSerializer
-# from .models import Reset, User, UserToken
-# from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
-# from rest_framework.authentication import get_authorization_header
-# import random
-# import string
-# from django.core.mail import send_mail
-# from datetime import datetime,timedelta, timezone
-
+from django.urls import path
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import exceptions, status
+import datetime
 from .serializers import UserSerializer
 from .models import Reset, User, UserToken
 from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
+from rest_framework.authentication import get_authorization_header
+import random
+import string
 from django.core.mail import send_mail
-from datetime import datetime, timedelta, timezone
+from datetime import datetime,timedelta, timezone
+
+# from django.shortcuts import render
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import exceptions, status
+# from .serializers import UserSerializer
+# from .models import Reset, User, UserToken
+# from .authentication import decode_refresh_token, create_access_token, JWTAuthentication, create_refresh_token
+# from django.core.mail import send_mail
+# from datetime import datetime, timedelta, timezone
 
 
 

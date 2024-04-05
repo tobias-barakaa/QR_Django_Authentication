@@ -5,7 +5,9 @@ import { Login } from './components/Login';
 import { Register } from './components/Register';
 import { Nav } from './components/Nav';
 import { Home } from './components/Home';
+import  Forgot from './components/Forgot';
 
+import  Reset from './components/Reset';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 
@@ -20,6 +22,10 @@ function App() {
 <Route path="/login" element={<Login />} />
 
 <Route path="/register" element={<Register />} />
+<Route path="/forgot" element={<Forgot />} />
+<Route path="/reset/:token" element={<Reset />} />
+
+
 
 </Routes>
 
