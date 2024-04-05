@@ -8,6 +8,11 @@ export const Home = () => {
         const fetchData = async () => {
             try {
                 const response = await axios.get('user', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+
                    
                 });
                 const user = response.data;

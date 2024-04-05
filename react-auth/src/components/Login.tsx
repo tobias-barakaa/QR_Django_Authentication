@@ -14,6 +14,7 @@ export const Login = () => {
             password: password
         })
         setRedirect(true)
+        
 
     }
     if(redirect) {
