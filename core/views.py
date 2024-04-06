@@ -24,6 +24,7 @@ import random
 import string
 from django.core.mail import send_mail
 from datetime import datetime,timedelta, timezone
+import pyotp
 
 # from django.shortcuts import render
 # from rest_framework.views import APIView
@@ -50,6 +51,35 @@ class RegisterAPIView(APIView):
         serializer.save()
         return Response(serializer.data)
 
+# class LoginAPIView(APIView):
+#     def post(self, request):
+#         email = request.data['email']
+#         password = request.data['password']
+        
+#         user = User.objects.filter(email=email).first()
+        
+#         if user is None:
+#             raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+#         if not user.check_password(password):
+#             raise exceptions.AuthenticationFailed('Invalid credentials')
+        
+#         access_token = create_access_token(user.id)
+#         refresh_token = create_refresh_token(user.id)
+#         UserToken.objects.create(
+#             user_id=user.id,
+#             token=refresh_token,
+#             expired_at=datetime.now(timezone.utc) + timedelta(days=7)  # Use datetime directly
+#         )
+        
+#         response = Response()
+
+#         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True)
+#         response.data = {
+#             'token': access_token
+#         }
+#         return response
+
 class LoginAPIView(APIView):
     def post(self, request):
         email = request.data['email']
@@ -63,10 +93,39 @@ class LoginAPIView(APIView):
         if not user.check_password(password):
             raise exceptions.AuthenticationFailed('Invalid credentials')
         
-        access_token = create_access_token(user.id)
-        refresh_token = create_refresh_token(user.id)
+        if user.tfa_secret:
+            return Response({
+                'id':user.id
+            })
+        
+        secret = pyotp.random_base32()
+        otpauth_url = pyotp.totp.TOTP(secret).provisioning_uri(issuer_name='My App')
+        return Response({
+            'id': user.id,
+            'secret': secret,
+            'otpauth_url': otpauth_url
+        })
+
+class TwoFactorLoginAPIView(APIView):
+    def post(self, request):
+        id = request.data['id']
+        user = User.objects.filter(pk=id).first()
+        if not user:
+            raise exceptions.AuthenticationFailed('Invalid user')
+        
+        secret = user.tfa_secret if user.tfa_secret !='' else request.data['secret']
+        
+        
+        if not pyotp.TOTP(secret).verify(request.data['code']):
+            raise exceptions.AuthenticationFailed('Invalid code')
+        
+        if user.tfa_secret == '':
+            user.tfa_secret = secret
+            user.save()
+        access_token = create_access_token(id)
+        refresh_token = create_refresh_token(id)
         UserToken.objects.create(
-            user_id=user.id,
+            user_id=id,
             token=refresh_token,
             expired_at=datetime.now(timezone.utc) + timedelta(days=7)  # Use datetime directly
         )

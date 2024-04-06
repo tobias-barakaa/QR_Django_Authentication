@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ForgotResetAPIView,ResetAPIView, RegisterAPIView,LogoutAPIVIEW, LoginAPIView, UserAPIView, RefreshAPIView
+from .views import TwoFactorLoginAPIView, ForgotResetAPIView,ResetAPIView, RegisterAPIView,LogoutAPIVIEW, LoginAPIView, UserAPIView, RefreshAPIView
 
 # urlpatterns = [
 #     path("register", RegisterAPIView.as_view(), name="register"),
@@ -18,6 +18,6 @@ urlpatterns = [
     path("refresh", RefreshAPIView.as_view(), name="RefreshAPIView"),    
     path("logout", LogoutAPIVIEW.as_view(), name="LogoutAPIVIEW"),
     path("forgot", ForgotResetAPIView.as_view(), name="ForgotResetAPIView"),  
-    path("reset", ResetAPIView.as_view(), name="ResetAPIView")  
-
+    path("reset", ResetAPIView.as_view(), name="ResetAPIView") ,
+    path("two-factor", TwoFactorLoginAPIView.as_view(), name="FactorAPIView"),
 ]
