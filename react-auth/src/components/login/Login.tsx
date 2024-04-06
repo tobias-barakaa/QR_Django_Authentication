@@ -15,8 +15,8 @@ export const Login = () => {
 
         id: number,
         secret?: string,
-        otpauth_url?: number,
     
+        otpauth_url?: string,
     }>({id: 0})
     // Define loginData here. Adjust this according to your needs.
     const success = () => {
@@ -34,7 +34,7 @@ export const Login = () => {
     }
 
     let form;
-    if(loginData.id === 0) {
+    if(loginData?.id === 0) {
         form = <LoginForm loginData={setLoginData} />
     } else {
     form = <AuthenticateForm loginData={loginData} success={success} />

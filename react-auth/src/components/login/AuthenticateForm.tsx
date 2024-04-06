@@ -1,16 +1,26 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
+import qrcode from 'qrcode'
 
 const AuthenticateForm = (props: {
     loginData: {  
     id: number,
     secret?: string,
-    otpauth_url?: number,
+    otpauth_url?: string,
     },
     success: Function,
 
 }) => {
     const [code, setCode] = useState('')
+    const [img, setImg] = useState<ReactElement | null>(null);
+
+    useEffect(() => {
+        if (props.loginData.otpauth_url) {
+            qrcode.toDataURL(props.loginData.otpauth_url, (err, src) => {
+                setImg(<img src={src} alt="qr" style={{width: '100%'}} />)
+            })
+        }
+    }, [props.loginData.otpauth_url])
 
 const submit = async(e:any) => {
     e.preventDefault();
@@ -30,7 +40,7 @@ const submit = async(e:any) => {
 
 
   return (
-    <main className="form-signin">
+    <main>
         
         <form onSubmit={submit}>
             <h1 className="h3 mb-3 fw-normal">Please Insert your authenticator code</h1>
@@ -45,6 +55,7 @@ const submit = async(e:any) => {
             
 
         </form>
+        {img}
     
     </main>
   )
